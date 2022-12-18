@@ -1,0 +1,8 @@
+{    
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/spreadic/spreadic-schema/main/schemas/data_definition.json": [
+      "models/**/*.yml",
+      "models/**/*.yaml"
+    ]
+  },
+}

@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spreadic/spreadic-schema/blob/main/schemas/data_definition.json",
+  "title": "Spreadic Data Definition",
+  "description": "It contains the data definition for Spreadic's semantic layer, including the models and access profiles.",
+  "type": "object",
+  
+  "properties": {
+    "models": {
+      "type": "array",
+      "description": "The list of models in the given domain",
+      "items": {
+        "type": "object",
+        "description": "Model is a logical entity composed of data element(s) (column(s)), e.g. orders, customers",
+        "required": [
+          "name",
+          "columns",
+          "meta"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the given model"
+          },
+          "columns": {
+            "type": "array",
+            "description": "The list of column object(s) belonged to the given model",
+            "items": {
+              "$ref": "#/$definitions/column"
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the given model"
+          },
+          "meta": {
+            "$ref": "#/$definitions/model_meta"
+          }
+        }
+      }
+    },
+    "access_profiles": {
+      "type": "array",
+      "description": "The list of access profiles defined for the given domain",
+      "items": {
+        "type": "object",
+        "description": "Access profile encapsulates the rules and users to provide restricted access to the underlying data elements (models, columns, rows) in the given domain",
+        "oneOf": [
+          {
+            "required": [
+              "name",
+              "access",
+              "rules"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "access",
+              "admin"
+            ]
+          }
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the given access profile"
+          },
+          "rules": {
+            "type": "array",
+            "description": "The list of access rules associated with the given access profile",
+            "items": {
+              "$ref": "#/$definitions/rule"
+            }
+          },
+          "admin": {
+            "type": "boolean",
+            "description": "The flag to indicate whether or not the given access profile defines the user(s) as Spreadic administrator(s)"
+          },
+          "access": {
+            "$ref": "#/$definitions/string_array"
+          },
+          "description": {
+            "type": "string",
+            "description": "The human-readable description of the given access profile"
+          }
+        },
+        "additionalProperties": false
+
+      }
+    }
+  },
+  "$definitions": {
+    "string_array": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "model_meta": {
+      "type": "object",
+      "description": "The metadata of the given model",
+      "required": [
+        "label"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "The label of the given model"
+        },
+        "restricted": {
+          "type": "boolean",
+          "description": "The flag to indicate whether or not the given model is restricted from general access"
+        },
+        "sets": {
+          "type": "array",
+          "description": "The list of sets associated with the given model",
+          "items": {
+            "$ref": "#/$definitions/set"
+          }
+        },
+        "joins": {
+          "type": "array",
+          "description": "The list of rule(s) to cross-join other model(s)",
+          "items": {
+            "$ref": "#/$definitions/join"
+          }
+        }
+      }
+    },
+    "column": {
+      "type": "object",
+      "description": "Column is a basic data element that contains most granular details of a logical entity, e.g. customer_country, order_id. Column can either be a dimension or a metric.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the given column"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the given column"
+        },
+        "meta": {
+          "$ref": "#/$definitions/column_meta"
+        }
+      }
+    },
+    "column_meta": {
+      "type": "object",
+      "description": "The metadata of the given column",
+      "properties": {
+        "dimension": {
+          "$ref": "#/$definitions/dimension"
+        },
+        "dimensions": {
+          "type": "object",
+          "description": "The list of dimension columns related to the given base column",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "#/$definitions/dimension"
+            }
+          },
+          "additionalProperties": false
+        },
+        "metrics": {
+          "type": "object",
+          "description": "The list of metric columns related to the given base column",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "#/$definitions/metric"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "description": "Dimension column is a natural or calculated attribute of a logical entity without aggregation, e.g. customer_country, order_id, brand_name",
+      "required": [
+        "label"
+      ],
+      "properties": {
+        "hidden": {
+          "type": "boolean",
+          "description": "The flag to indicate whether or not the given dimension column should be hidden"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label of the given dimension column"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the given dimension column"
+        },
+        "sql": {
+          "type": "string",
+          "description": "The SQL statement to define a calculated dimension, e.g. customers.first_name || ' ' || customers.last_name. Note that the columns used have to be fully qualified (i.e. [schema].[column])."
+        },
+        "restricted": {
+          "type": "boolean",
+          "description": "The flag to indicate whether or not the given dimension column is restricted from general access"
+        },
+        "time_intervals": {
+          "type": "array",
+          "description": "The list of time intervals extended from the given dimension column",
+          "items": {
+            "type": "string",
+            "description": "The time interval for date column extension. Allowable values are 'RAW', 'DAY', 'WEEK', 'MONTH' and 'YEAR'.",
+            "enum": ["RAW", "DAY", "WEEK", "MONTH", "YEAR"]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "metric": {
+      "type": "object",
+      "description": "Metric column is an aggregated column on a base column",
+      "required": [
+        "label",
+        "type"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "The label of the given metric column"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the given metric column"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the given metric column. Allowable values are 'number' (a SQL statement needs to be filled), 'count', 'max', 'min', 'sum' and 'count_distinct'.",
+          "enum": ["number", "average", "count", "max", "min", "sum", "count_distinct"]
+        },
+        "sql": {
+          "type": "string",
+          "description": "The SQL statement to define the given metric should be derived. It's only interpreted for 'number' type. Note that the columns used have to be fully qualified (i.e. [schema].[column])."
+        },
+        "restricted": {
+          "type": "boolean",
+          "description": "The flag to indicate whether or not the given metric column is restricted from general access"
+        }
+      },
+      "additionalProperties": false
+    },
+    "set": {
+      "type": "object",
+      "description": "Set is a collection of columns with optionally defined filtering and ordering",
+      "required": [
+        "name",
+        "columns"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the given set"
+        },
+        "columns": {
+          "$ref": "#/$definitions/string_array",
+          "description": "The list of the columns under the given set"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label of the given set"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the given set"
+        },
+        "sql_filter": {
+          "type": "string",
+          "description": "The optional SQL where clause to define the filtering injected when the given set is chosen"
+        },
+        "sql_ordering": {
+          "type": "string",
+          "description": "The optional SQL ordering clause to define any default ordering when no ordering is provided"
+        }
+      },
+      "additionalProperties": false
+    },
+    "join": {
+      "type": "object",
+      "description": "Join rule is to define how cross-join operation is carried out",
+      "required": [
+        "model",
+        "sql_on",
+        "columns"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The name of the target model to be joined by the current model"
+        },
+        "sql_on": {
+          "type": "string",
+          "description": "The condition of joining the current model and the target model, e.g. orders.customer_id = customers.id. Note that the columns used have to be fully qualified (i.e. [schema].[column])."
+        },
+        "columns": {
+          "$ref": "#/$definitions/string_array",
+          "description": "The list of column name(s) in the target model to be included in the current model after joining"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "description": "Access rule is define access control behaviour at the model, row and column levels",
+      "required": [
+        "model"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The target model for the given access rule"
+        },
+        "sql_filter": {
+          "type": "string",
+          "description": "The row-level access control, in form of a SQL where clause, e.g. customer.customer_country = 'United Kingdom'. Note that the columns used have to be fully qualified (i.e. [schema].[column])."
+        },
+        "columns": {
+          "$ref": "#/$definitions/string_array",
+          "description": "The column-level access control, in form of a list of column name(s) in the target model that the given profile rule allows access"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
