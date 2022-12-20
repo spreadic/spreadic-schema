@@ -78,7 +78,8 @@
             "description": "The flag to indicate whether or not the given access profile defines the user(s) as Spreadic administrator(s)"
           },
           "access": {
-            "$ref": "#/$definitions/string_array"
+            "$ref": "#/$definitions/string_array",
+            "description": "The list of user(s), in form of email address(es), that is/are included in the given access profile"
           },
           "description": {
             "type": "string",
@@ -213,8 +214,7 @@
             "enum": ["RAW", "DAY", "WEEK", "MONTH", "YEAR"]
           }
         }
-      },
-      "additionalProperties": false
+      }
     },
     "metric": {
       "type": "object",
@@ -245,8 +245,7 @@
           "type": "boolean",
           "description": "The flag to indicate whether or not the given metric column is restricted from general access"
         }
-      },
-      "additionalProperties": false
+      }
     },
     "set": {
       "type": "object",
