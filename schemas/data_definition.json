@@ -285,15 +285,30 @@
     "join": {
       "type": "object",
       "description": "Join rule is to define how cross-join operation is carried out",
-      "required": [
-        "model",
-        "sql_on",
-        "columns"
+      "oneOf": [
+        {
+          "required": [
+            "join",
+            "sql_on",
+            "columns"
+          ]
+        },
+        {
+          "required": [
+            "model",
+            "sql_on",
+            "columns"
+          ]
+        }
       ],
       "properties": {
+        "join": {
+          "type": "string",
+          "description": "The name of the target model to be joined by the current model. It takes precedence over 'model'."
+        },
         "model": {
           "type": "string",
-          "description": "The name of the target model to be joined by the current model"
+          "description": "The name of the target model to be joined by the current model. Note that 'join' takes precedence over this."
         },
         "sql_on": {
           "type": "string",
